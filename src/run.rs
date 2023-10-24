@@ -32,29 +32,53 @@ fn run_ppu<CPU: Cpu>(
                 while let Ok(msg) = buttons_rx.try_recv() {
                     match msg {
                         Message::Button(name, pressed) => match name {
-                            ButtonName::A => {
-                                ppu.buttons.a = pressed;
+                            ButtonName::A1 => {
+                                ppu.buttons.a1 = pressed;
                             }
-                            ButtonName::B => {
-                                ppu.buttons.b = pressed;
+                            ButtonName::B1 => {
+                                ppu.buttons.b1 = pressed;
                             }
-                            ButtonName::Up => {
-                                ppu.buttons.up = pressed;
+                            ButtonName::Up1 => {
+                                ppu.buttons.up1 = pressed;
                             }
-                            ButtonName::Down => {
-                                ppu.buttons.down = pressed;
+                            ButtonName::Down1 => {
+                                ppu.buttons.down1 = pressed;
                             }
-                            ButtonName::Left => {
-                                ppu.buttons.left = pressed;
+                            ButtonName::Left1 => {
+                                ppu.buttons.left1 = pressed;
                             }
-                            ButtonName::Right => {
-                                ppu.buttons.right = pressed;
+                            ButtonName::Right1 => {
+                                ppu.buttons.right1 = pressed;
                             }
-                            ButtonName::Start => {
-                                ppu.buttons.start = pressed;
+                            ButtonName::Start1 => {
+                                ppu.buttons.start1 = pressed;
                             }
-                            ButtonName::Select => {
-                                ppu.buttons.select = pressed;
+                            ButtonName::Select1 => {
+                                ppu.buttons.select1 = pressed;
+                            }
+                            ButtonName::A2 => {
+                                ppu.buttons.a2 = pressed;
+                            }
+                            ButtonName::B2 => {
+                                ppu.buttons.b2 = pressed;
+                            }
+                            ButtonName::Up2 => {
+                                ppu.buttons.up2 = pressed;
+                            }
+                            ButtonName::Down2 => {
+                                ppu.buttons.down2 = pressed;
+                            }
+                            ButtonName::Left2 => {
+                                ppu.buttons.left2 = pressed;
+                            }
+                            ButtonName::Right2 => {
+                                ppu.buttons.right2 = pressed;
+                            }
+                            ButtonName::Start2 => {
+                                ppu.buttons.start2 = pressed;
+                            }
+                            ButtonName::Select2 => {
+                                ppu.buttons.select2 = pressed;
                             }
                         },
                         Message::Pause(true) => {
@@ -193,34 +217,100 @@ where
             } => {
                 if let Some(code) = input.virtual_keycode {
                     match code {
-                        VirtualKeyCode::Left | VirtualKeyCode::A => {
+                        VirtualKeyCode::A => {
                             control_tx
                                 .send(Message::Button(
-                                    ButtonName::Left,
+                                    ButtonName::Left1,
                                     input.state == ElementState::Pressed,
                                 ))
                                 .expect("failed to send");
                         }
-                        VirtualKeyCode::Up | VirtualKeyCode::W => {
+                        VirtualKeyCode::W => {
                             control_tx
                                 .send(Message::Button(
-                                    ButtonName::Up,
+                                    ButtonName::Up1,
                                     input.state == ElementState::Pressed,
                                 ))
                                 .expect("failed to send");
                         }
-                        VirtualKeyCode::Right | VirtualKeyCode::D => {
+                        VirtualKeyCode::D => {
                             control_tx
                                 .send(Message::Button(
-                                    ButtonName::Right,
+                                    ButtonName::Right1,
                                     input.state == ElementState::Pressed,
                                 ))
                                 .expect("failed to send");
                         }
-                        VirtualKeyCode::Down | VirtualKeyCode::S => {
+                        VirtualKeyCode::S => {
                             control_tx
                                 .send(Message::Button(
-                                    ButtonName::Down,
+                                    ButtonName::Down1,
+                                    input.state == ElementState::Pressed,
+                                ))
+                                .expect("failed to send");
+                        }
+                        VirtualKeyCode::Space => {
+                            control_tx
+                                .send(Message::Button(
+                                    ButtonName::Start1,
+                                    input.state == ElementState::Pressed,
+                                ))
+                                .expect("failed to send");
+                        }
+                        VirtualKeyCode::LShift => {
+                            control_tx
+                                .send(Message::Button(
+                                    ButtonName::Select1,
+                                    input.state == ElementState::Pressed,
+                                ))
+                                .expect("failed to send");
+                        }
+                        VirtualKeyCode::Z | VirtualKeyCode::F => {
+                            control_tx
+                                .send(Message::Button(
+                                    ButtonName::B1,
+                                    input.state == ElementState::Pressed,
+                                ))
+                                .expect("failed to send");
+                        }
+                        VirtualKeyCode::X | VirtualKeyCode::G => {
+                            control_tx
+                                .send(Message::Button(
+                                    ButtonName::A1,
+                                    input.state == ElementState::Pressed,
+                                ))
+                                .expect("failed to send");
+                        }
+
+
+                        VirtualKeyCode::Left => {
+                            control_tx
+                                .send(Message::Button(
+                                    ButtonName::Left2,
+                                    input.state == ElementState::Pressed,
+                                ))
+                                .expect("failed to send");
+                        }
+                        VirtualKeyCode::Up => {
+                            control_tx
+                                .send(Message::Button(
+                                    ButtonName::Up2,
+                                    input.state == ElementState::Pressed,
+                                ))
+                                .expect("failed to send");
+                        }
+                        VirtualKeyCode::Right => {
+                            control_tx
+                                .send(Message::Button(
+                                    ButtonName::Right2,
+                                    input.state == ElementState::Pressed,
+                                ))
+                                .expect("failed to send");
+                        }
+                        VirtualKeyCode::Down => {
+                            control_tx
+                                .send(Message::Button(
+                                    ButtonName::Down2,
                                     input.state == ElementState::Pressed,
                                 ))
                                 .expect("failed to send");
@@ -228,31 +318,31 @@ where
                         VirtualKeyCode::Return => {
                             control_tx
                                 .send(Message::Button(
-                                    ButtonName::Start,
+                                    ButtonName::Start2,
                                     input.state == ElementState::Pressed,
                                 ))
                                 .expect("failed to send");
                         }
-                        VirtualKeyCode::RShift | VirtualKeyCode::LShift => {
+                        VirtualKeyCode::RShift => {
                             control_tx
                                 .send(Message::Button(
-                                    ButtonName::Select,
+                                    ButtonName::Select2,
                                     input.state == ElementState::Pressed,
                                 ))
                                 .expect("failed to send");
                         }
-                        VirtualKeyCode::Z => {
+                        VirtualKeyCode::Key1 => {
                             control_tx
                                 .send(Message::Button(
-                                    ButtonName::B,
+                                    ButtonName::B2,
                                     input.state == ElementState::Pressed,
                                 ))
                                 .expect("failed to send");
                         }
-                        VirtualKeyCode::X => {
+                        VirtualKeyCode::Key2 => {
                             control_tx
                                 .send(Message::Button(
-                                    ButtonName::A,
+                                    ButtonName::A2,
                                     input.state == ElementState::Pressed,
                                 ))
                                 .expect("failed to send");

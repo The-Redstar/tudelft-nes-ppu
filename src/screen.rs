@@ -8,27 +8,44 @@ use winit::window::Window;
 /// A struct containg all the buttons for one controller and whether they are pressed (`true`) or not (`false`)
 #[derive(Debug, Default, Copy, Clone, Eq, PartialEq)]
 pub struct Buttons {
-    pub a: bool,
-    pub b: bool,
-    pub up: bool,
-    pub down: bool,
-    pub left: bool,
-    pub right: bool,
-    pub select: bool,
-    pub start: bool,
+    pub a1: bool,
+    pub b1: bool,
+    pub up1: bool,
+    pub down1: bool,
+    pub left1: bool,
+    pub right1: bool,
+    pub select1: bool,
+    pub start1: bool,
+
+    pub a2: bool,
+    pub b2: bool,
+    pub up2: bool,
+    pub down2: bool,
+    pub left2: bool,
+    pub right2: bool,
+    pub select2: bool,
+    pub start2: bool,
 }
 
 impl Buttons {
     pub fn get_by_index(self, idx: u8) -> bool {
         match idx {
-            0 => self.a,
-            1 => self.b,
-            2 => self.select,
-            3 => self.start,
-            4 => self.up,
-            5 => self.down,
-            6 => self.left,
-            7 => self.right,
+            0 => self.a1,
+            1 => self.b1,
+            2 => self.select1,
+            3 => self.start1,
+            4 => self.up1,
+            5 => self.down1,
+            6 => self.left1,
+            7 => self.right1,
+            8 => self.a2,
+            9 => self.b2,
+            10 => self.select2,
+            11 => self.start2,
+            12 => self.up2,
+            13 => self.down2,
+            14 => self.left2,
+            15 => self.right2,
             _ => false,
         }
     }
@@ -36,14 +53,22 @@ impl Buttons {
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum ButtonName {
-    A,
-    B,
-    Up,
-    Down,
-    Left,
-    Right,
-    Start,
-    Select,
+    A1,
+    B1,
+    Up1,
+    Down1,
+    Left1,
+    Right1,
+    Start1,
+    Select1,
+    A2,
+    B2,
+    Up2,
+    Down2,
+    Left2,
+    Right2,
+    Start2,
+    Select2,
 }
 
 pub enum ScreenReader {

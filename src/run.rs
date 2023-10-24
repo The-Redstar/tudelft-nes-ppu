@@ -283,7 +283,7 @@ where
                         }
 
 
-                        VirtualKeyCode::Left => {
+                        VirtualKeyCode::Left | VirtualKeyCode::J => {
                             control_tx
                                 .send(Message::Button(
                                     ButtonName::Left2,
@@ -291,7 +291,7 @@ where
                                 ))
                                 .expect("failed to send");
                         }
-                        VirtualKeyCode::Up => {
+                        VirtualKeyCode::Up | VirtualKeyCode::I => {
                             control_tx
                                 .send(Message::Button(
                                     ButtonName::Up2,
@@ -299,7 +299,7 @@ where
                                 ))
                                 .expect("failed to send");
                         }
-                        VirtualKeyCode::Right => {
+                        VirtualKeyCode::Right | VirtualKeyCode::L =>  {
                             control_tx
                                 .send(Message::Button(
                                     ButtonName::Right2,
@@ -307,7 +307,7 @@ where
                                 ))
                                 .expect("failed to send");
                         }
-                        VirtualKeyCode::Down => {
+                        VirtualKeyCode::Down | VirtualKeyCode::K => {
                             control_tx
                                 .send(Message::Button(
                                     ButtonName::Down2,
@@ -331,7 +331,7 @@ where
                                 ))
                                 .expect("failed to send");
                         }
-                        VirtualKeyCode::Key1 => {
+                        VirtualKeyCode::Numpad1 | VirtualKeyCode::Semicolon => {
                             control_tx
                                 .send(Message::Button(
                                     ButtonName::B2,
@@ -339,7 +339,7 @@ where
                                 ))
                                 .expect("failed to send");
                         }
-                        VirtualKeyCode::Key2 => {
+                        VirtualKeyCode::Numpad2 | VirtualKeyCode::Apostrophe => {
                             control_tx
                                 .send(Message::Button(
                                     ButtonName::A2,

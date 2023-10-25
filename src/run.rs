@@ -106,8 +106,8 @@ fn run_ppu<CPU: Cpu>(
                                 let (relx,rely) = (posx / screensize.width as f64, posy / screensize.height as f64);
                                 //3: compute pointed pixel coordinates
                                 (px,py) = ((WIDTH as f64 * relx) as i32,(HEIGHT as f64 * rely) as i32);
-                                px=px.min(0).max(WIDTH as i32-1);
-                                py=py.min(0).max(HEIGHT as i32-1);
+                                px=px.min(WIDTH as i32-1).max(0);
+                                py=py.min(HEIGHT as i32-1).max(0);
                             }
                             
                         }
@@ -120,9 +120,9 @@ fn run_ppu<CPU: Cpu>(
                 return Err(e);
             }
 
-            if iteration == 0 {
-                println!("mouse coordinates: {},{}",px,py);
-            }
+            // if iteration == 0 {
+            //     println!("mouse coordinates: {},{}",px,py);
+            // }
 
             for _ in 0..3 {
                 ppu.update(cpu, writer);
@@ -164,10 +164,10 @@ fn run_ppu<CPU: Cpu>(
         } else if cycles % 1000 == 0
             && (busy_time - expected_time_spent) > Duration::from_secs_f64(0.2)
         {
-            println!(
-                "emulation behind by {:?}. trying to catch up...",
-                busy_time - expected_time_spent
-            );
+            // println!(
+            //     "emulation behind by {:?}. trying to catch up...",
+            //     busy_time - expected_time_spent
+            // );
         }
 
         last_tick = now;

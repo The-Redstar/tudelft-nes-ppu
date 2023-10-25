@@ -28,7 +28,7 @@ fn run_ppu<CPU: Cpu>(
 
 
     loop {
-        for _ in 0..ITER_PER_CYCLE {
+        for iteration in 0..ITER_PER_CYCLE {
             if let ScreenWriter::Real {
                 control_rx: buttons_rx,
                 screen,
@@ -120,8 +120,14 @@ fn run_ppu<CPU: Cpu>(
                 return Err(e);
             }
 
+            if iteration == 0 {
+                println!("mouse coordinates: {},{}",px,py);
+            }
+
             for _ in 0..3 {
                 ppu.update(cpu, writer);
+
+                // get color of pixel pointed to by cursor
                 if let ScreenWriter::Real {
                     screen,
                     ..
@@ -132,7 +138,7 @@ fn run_ppu<CPU: Cpu>(
                             .lock()
                             .expect("Failed to lock")
                             .frame_mut()
-                            [(4 * (py as usize * WIDTH as usize + px as usize))..(4 * (py as usize * WIDTH as usize + px as usize)+2)]
+                            [(4 * (py as usize * WIDTH as usize + px as usize))..(4 * (py as usize * WIDTH as usize + px as usize)+3)]
                         );
                     }
                 }

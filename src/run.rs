@@ -2,6 +2,7 @@ use crate::cpu::Cpu;
 use crate::screen::{ButtonName, Message, Screen, ScreenWriter};
 use crate::{Mirroring, Ppu, CPU_FREQ, HEIGHT, WIDTH};
 use pixels::{Pixels, SurfaceTexture};
+use winit::dpi::PhysicalSize;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 use std::{env, thread};
@@ -178,6 +179,12 @@ where
         .expect("failed to create window");
 
     let window_size = window.inner_size();
+
+    println!("Window size: {window_size:?}");
+
+    window.set_inner_size(PhysicalSize::new(WIDTH,HEIGHT));
+    let window_size = window.inner_size();
+
     let surface_texture = SurfaceTexture::new(window_size.width, window_size.height, &window);
     let pixels = Pixels::new(WIDTH, HEIGHT, surface_texture).expect("failed to create surface");
 

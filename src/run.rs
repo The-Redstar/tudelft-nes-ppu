@@ -266,6 +266,9 @@ where
             } => {
                 /* DUCK HUNT ADDITION */
                 
+                println!("{:?}",position);
+
+
                 control_tx
                     .send(Message::PixelPointed(position.x,position.y))
                     .expect("failed to send");

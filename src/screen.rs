@@ -82,10 +82,11 @@ pub enum ScreenReader {
 pub enum Message {
     Button(ButtonName, bool),
     Pause(bool),
+    PixelPointed(f64,f64),
 }
 
 #[derive(Clone)]
-pub struct Screen(Arc<ScreenReader>);
+pub struct Screen(pub Arc<ScreenReader>);
 
 pub enum ScreenWriter {
     Dummy,

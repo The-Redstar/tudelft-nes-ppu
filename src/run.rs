@@ -1,5 +1,5 @@
 use crate::cpu::Cpu;
-use crate::screen::{ButtonName, Message, Screen, ScreenWriter};
+use crate::screen::{ButtonName, Message, Screen, ScreenWriter, ScreenReader};
 use crate::{Mirroring, Ppu, CPU_FREQ, HEIGHT, WIDTH};
 use pixels::{Pixels, SurfaceTexture};
 use winit::dpi::PhysicalSize;
@@ -23,10 +23,15 @@ fn run_ppu<CPU: Cpu>(
     let mut cycles = 0;
     let mut last_tick = Instant::now();
 
+    let mut px = 0;
+    let mut py = 0;
+
+
     loop {
         for _ in 0..ITER_PER_CYCLE {
             if let ScreenWriter::Real {
                 control_rx: buttons_rx,
+                screen,
                 ..
             } = writer
             {
@@ -91,6 +96,21 @@ fn run_ppu<CPU: Cpu>(
                             last_tick = Instant::now();
                         }
                         Message::Pause(false) => {}
+                        Message::PixelPointed(posx,posy) => {
+                            let reader = screen.0.as_ref();
+                            if let ScreenReader::Real{window, ..}= reader {
+                                //0: take the position
+                                //1: take the screen size
+                                let screensize = window.inner_size();
+                                //2: compute relative screen dimensions
+                                let (relx,rely) = (posx / screensize.width as f64, posy / screensize.height as f64);
+                                //3: compute pointed pixel coordinates
+                                (px,py) = ((WIDTH as f64 * relx) as i32,(HEIGHT as f64 * rely) as i32);
+                                px=px.min(0).max(WIDTH as i32-1);
+                                py=py.min(0).max(HEIGHT as i32-1);
+                            }
+                            
+                        }
                     }
                 }
             }
@@ -102,6 +122,21 @@ fn run_ppu<CPU: Cpu>(
 
             for _ in 0..3 {
                 ppu.update(cpu, writer);
+                if let ScreenWriter::Real {
+                    screen,
+                    ..
+                } = writer {
+                    if let ScreenReader::Real{ pixels, .. } = &*screen.0 {
+                        ppu.pointed_pixel[..2].clone_from_slice(
+                            &pixels
+                            .lock()
+                            .expect("Failed to lock")
+                            .frame_mut()
+                            [(4 * (py as usize * WIDTH as usize + px as usize))..(4 * (py as usize * WIDTH as usize + px as usize)+2)]
+                        );
+                    }
+                }
+                
             }
         }
 
@@ -178,11 +213,12 @@ where
         .build(&event_loop)
         .expect("failed to create window");
 
-    let window_size = window.inner_size();
+    //let window_size = window.inner_size();
 
-    println!("Window size: {window_size:?}");
-
-    window.set_inner_size(PhysicalSize::new(WIDTH,HEIGHT));
+    //println!("Window size: {window_size:?}");
+    //modification for duck hunt
+    //force canvas to take up full window
+    window.set_inner_size(PhysicalSize::new(WIDTH*2,HEIGHT*2));
     let window_size = window.inner_size();
 
     let surface_texture = SurfaceTexture::new(window_size.width, window_size.height, &window);
@@ -217,6 +253,19 @@ where
                 ..
             } => {
                 control_tx.send(Message::Pause(!f)).expect("failed to send");
+            }
+            Event::WindowEvent {
+                event: WindowEvent::CursorMoved { position, .. },
+                ..
+            } => {
+                /* DUCK HUNT ADDITION */
+                
+                control_tx
+                    .send(Message::PixelPointed(position.x,position.y))
+                    .expect("failed to send");
+
+
+                /* = = = = = = = = = */
             }
             Event::WindowEvent {
                 event: WindowEvent::KeyboardInput { input, .. },

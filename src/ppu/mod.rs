@@ -16,6 +16,7 @@ pub mod registers;
 
 /// Emulating an NTSC PPU chip
 pub struct Ppu {
+    pub pointed_pixel: [u8; 3],
     /// how many lines we've drawn. After 240, an NMI is given to the cpu
     /// and only at 262 does it reset to 0
     scanline: usize,
@@ -63,6 +64,7 @@ impl Ppu {
     /// by the emulator.
     pub fn new(mirroring: Mirroring) -> Self {
         Self {
+            pointed_pixel: [0,0,0],
             scanline: 0,
             line_progress: 0,
             controller_register: ControllerRegister::default(),
@@ -84,6 +86,11 @@ impl Ppu {
             buttons: Buttons::default(),
         }
     }
+
+    pub fn get_pointed_pixel(&self) -> [u8;3] {
+        self.pointed_pixel
+    }
+
 
     fn vram_read_mirrored(&self, addr: u16) -> u8 {
         self.vram[(self.mirror_address(addr) - 0x2000) as usize]

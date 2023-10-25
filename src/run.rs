@@ -133,7 +133,7 @@ fn run_ppu<CPU: Cpu>(
                     ..
                 } = writer {
                     if let ScreenReader::Real{ pixels, .. } = &*screen.0 {
-                        ppu.pointed_pixel[..2].clone_from_slice(
+                        ppu.pointed_pixel[..3].clone_from_slice(
                             &pixels
                             .lock()
                             .expect("Failed to lock")

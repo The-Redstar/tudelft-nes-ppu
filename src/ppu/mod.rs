@@ -466,10 +466,12 @@ impl Ppu {
             color.2 = 0xff;
         }
 
-        if (x as i32 - px).abs() + (y as i32 - py).abs() < 10 && color.0>200 && color.1>200 && color.2>200 {
-            self.buttons.light = true;
-        } else {
-            self.buttons.light = false;
+        if (x as i32 - px).abs() + (y as i32 - py).abs() < 10 {
+            if color.0>200 && color.1>200 && color.2>200 {
+                self.buttons.light = true;
+            } else {
+                self.buttons.light = false;
+            }
         }
         screen.draw_pixel(x, y, color);
 

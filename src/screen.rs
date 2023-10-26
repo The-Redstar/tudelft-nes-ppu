@@ -72,6 +72,7 @@ pub enum ButtonName {
     Right2,
     Start2,
     Select2,
+    MouseLeft,
 }
 
 pub enum ScreenReader {

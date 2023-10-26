@@ -6,7 +6,7 @@ use winit::dpi::PhysicalSize;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 use std::{env, thread};
-use winit::event::{ElementState, Event, VirtualKeyCode, WindowEvent};
+use winit::event::{ElementState, Event, VirtualKeyCode, WindowEvent, MouseButton};
 use winit::event_loop::{ControlFlow, EventLoop};
 use winit::window::WindowBuilder;
 
@@ -85,6 +85,9 @@ fn run_ppu<CPU: Cpu>(
                             }
                             ButtonName::Select2 => {
                                 ppu.buttons.select2 = pressed;
+                            }
+                            ButtonName::MouseLeft => {
+                                ppu.buttons.trigger = pressed;
                             }
                         },
                         Message::Pause(true) => {
@@ -271,6 +274,17 @@ where
                     .send(Message::PixelPointed(position.x,position.y))
                     .expect("failed to send");
                 /* = = = = = = = = = */
+            }
+            Event::WindowEvent {
+                event:WindowEvent::MouseInput {state: button_state, button: MouseButton::Left, .. } ,
+                ..
+            } => {
+                control_tx
+                    .send(Message::Button(
+                        ButtonName::MouseLeft,
+                        button_state == ElementState::Pressed,
+                    ))
+                    .expect("failed to send");
             }
             Event::WindowEvent {
                 event: WindowEvent::KeyboardInput { input, .. },

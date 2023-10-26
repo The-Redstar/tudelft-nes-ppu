@@ -410,12 +410,13 @@ impl Ppu {
     // returns true if a tile was drawn on this pixel
     #[allow(clippy::too_many_arguments)]
     fn draw_pixel(
-        &self,
+        &mut self,
         cpu: &mut impl Cpu,
         screen: &mut ScreenWriter,
         x: usize,
         y: usize,
         name_table_address: u16,
+        px: i32, py: i32, //pixels pointed to by cursor
     ) -> bool {
         let scroll_x = self.scroll.x;
         let scroll_y = self.scroll.y;
@@ -465,6 +466,9 @@ impl Ppu {
             color.2 = 0xff;
         }
 
+        if (x as i32 - px).abs() + (y as i32 - py).abs() < 10 && color.0>200 && color.1>200 && color.2>200 {
+            self.buttons.light = true;
+        }
         screen.draw_pixel(x, y, color);
 
         bit_lower || bit_upper
@@ -477,7 +481,7 @@ impl Ppu {
 
     #[allow(clippy::too_many_arguments)]
     fn draw_sprite_pixel(
-        &self,
+        &mut self,
         cpu: &mut impl Cpu,
         screen: &mut ScreenWriter,
         sprite: [u8; 4],
@@ -487,6 +491,8 @@ impl Ppu {
         mut sprite_x_off: u16,
         mut sprite_y_off: u16,
         name_table: u16,
+
+        px:i32,py:i32,
     ) -> bool {
         let mut sprite_zero_hit = false;
 
@@ -550,7 +556,7 @@ impl Ppu {
 
         // Don't draw a background sprite over background tiles,
         // but do draw it over the background color
-        if behind_background && self.draw_pixel(cpu, screen, x, y, name_table) {
+        if behind_background && self.draw_pixel(cpu, screen, x, y, name_table, px,py) {
             return sprite_zero_hit;
         }
 
@@ -559,7 +565,7 @@ impl Ppu {
         sprite_zero_hit
     }
 
-    fn draw_sprites(&self, cpu: &mut impl Cpu, screen: &mut ScreenWriter, name_table: u16) -> bool {
+    fn draw_sprites(&mut self, cpu: &mut impl Cpu, screen: &mut ScreenWriter, name_table: u16, px:i32, py:i32) -> bool {
         let mut sprite_zero_hit = false;
 
         for i in (0..8).rev() {
@@ -581,6 +587,7 @@ impl Ppu {
                     (self.line_progress - sprite_x as usize) as u16,
                     (self.scanline - sprite_y as usize) as u16,
                     name_table,
+                    px,py,
                 );
             }
         }
@@ -589,7 +596,7 @@ impl Ppu {
     }
 
     /// the screen is optional, since sometimes there is no screen (headless mode)
-    pub(crate) fn update(&mut self, cpu: &mut impl Cpu, screen: &mut ScreenWriter) {
+    pub(crate) fn update(&mut self, cpu: &mut impl Cpu, screen: &mut ScreenWriter, px:i32,py:i32) {
         self.update_scanline(cpu, screen);
 
         if !self.blanking() {
@@ -601,9 +608,10 @@ impl Ppu {
                 self.line_progress,
                 self.scanline,
                 nametable_addr,
+                px,py,
             );
 
-            if self.draw_sprites(cpu, screen, nametable_addr) {
+            if self.draw_sprites(cpu, screen, nametable_addr, px,py) {
                 self.status_register.sprite_zero_hit = true;
             }
         }

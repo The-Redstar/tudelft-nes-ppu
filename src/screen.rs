@@ -25,6 +25,9 @@ pub struct Buttons {
     pub right2: bool,
     pub select2: bool,
     pub start2: bool,
+
+    pub light: bool,
+    pub trigger: bool,
 }
 
 impl Buttons {

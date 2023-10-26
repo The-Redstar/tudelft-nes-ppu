@@ -125,23 +125,23 @@ fn run_ppu<CPU: Cpu>(
             // }
 
             for _ in 0..3 {
-                ppu.update(cpu, writer);
+                ppu.update(cpu, writer,px,py);
 
                 // get color of pixel pointed to by cursor
-                if let ScreenWriter::Real {
-                    screen,
-                    ..
-                } = writer {
-                    if let ScreenReader::Real{ pixels, .. } = &*screen.0 {
-                        ppu.pointed_pixel[..3].clone_from_slice(
-                            &pixels
-                            .lock()
-                            .expect("Failed to lock")
-                            .frame_mut()
-                            [(4 * (py as usize * WIDTH as usize + px as usize))..(4 * (py as usize * WIDTH as usize + px as usize)+3)]
-                        );
-                    }
-                }
+                // if let ScreenWriter::Real {
+                //     screen,
+                //     ..
+                // } = writer {
+                //     if let ScreenReader::Real{ pixels, .. } = &*screen.0 {
+                //         ppu.pointed_pixel[..3].clone_from_slice(
+                //             &pixels
+                //             .lock()
+                //             .expect("Failed to lock")
+                //             .frame_mut()
+                //             [(4 * (py as usize * WIDTH as usize + px as usize))..(4 * (py as usize * WIDTH as usize + px as usize)+3)]
+                //         );
+                //     }
+                // }
                 
             }
         }

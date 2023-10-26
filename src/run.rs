@@ -28,7 +28,7 @@ fn run_ppu<CPU: Cpu>(
 
 
     loop {
-        for iteration in 0..ITER_PER_CYCLE {
+        for _ in 0..ITER_PER_CYCLE {
             if let ScreenWriter::Real {
                 control_rx: buttons_rx,
                 screen,
@@ -164,10 +164,10 @@ fn run_ppu<CPU: Cpu>(
         } else if cycles % 1000 == 0
             && (busy_time - expected_time_spent) > Duration::from_secs_f64(0.2)
         {
-            // println!(
-            //     "emulation behind by {:?}. trying to catch up...",
-            //     busy_time - expected_time_spent
-            // );
+            println!(
+                "emulation behind by {:?}. trying to catch up...",
+                busy_time - expected_time_spent
+            );
         }
 
         last_tick = now;
@@ -266,14 +266,10 @@ where
             } => {
                 /* DUCK HUNT ADDITION */
                 
-                println!("{:?}",position);
-
-
+                // println!("{:?}",position);
                 control_tx
                     .send(Message::PixelPointed(position.x,position.y))
                     .expect("failed to send");
-
-
                 /* = = = = = = = = = */
             }
             Event::WindowEvent {

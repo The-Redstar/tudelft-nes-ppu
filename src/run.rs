@@ -23,8 +23,8 @@ fn run_ppu<CPU: Cpu>(
     let mut cycles = 0;
     let mut last_tick = Instant::now();
 
-    let mut px = 0;
-    let mut py = 0;
+    let mut mouse_x = 0;
+    let mut mouse_y = 0;
 
 
     loop {
@@ -108,9 +108,9 @@ fn run_ppu<CPU: Cpu>(
                                 //2: compute relative screen dimensions
                                 let (relx,rely) = (posx / screensize.width as f64, posy / screensize.height as f64);
                                 //3: compute pointed pixel coordinates
-                                (px,py) = ((WIDTH as f64 * relx) as i32,(HEIGHT as f64 * rely) as i32);
-                                px=px.min(WIDTH as i32-1).max(0);
-                                py=py.min(HEIGHT as i32-1).max(0);
+                                (mouse_x,mouse_y) = ((WIDTH as f64 * relx) as i32,(HEIGHT as f64 * rely) as i32);
+                                //mouse_x=mouse_x.min(WIDTH as i32-1).max(0); //bounding not required because we are no longer indexing pixels
+                                //mouse_y=mouse_y.min(HEIGHT as i32-1).max(0);
                             }
                             
                         }
@@ -123,29 +123,8 @@ fn run_ppu<CPU: Cpu>(
                 return Err(e);
             }
 
-            // if iteration == 0 {
-            //     println!("mouse coordinates: {},{}",px,py);
-            // }
-
             for _ in 0..3 {
-                ppu.update(cpu, writer,px,py);
-
-                // get color of pixel pointed to by cursor
-                // if let ScreenWriter::Real {
-                //     screen,
-                //     ..
-                // } = writer {
-                //     if let ScreenReader::Real{ pixels, .. } = &*screen.0 {
-                //         ppu.pointed_pixel[..3].clone_from_slice(
-                //             &pixels
-                //             .lock()
-                //             .expect("Failed to lock")
-                //             .frame_mut()
-                //             [(4 * (py as usize * WIDTH as usize + px as usize))..(4 * (py as usize * WIDTH as usize + px as usize)+3)]
-                //         );
-                //     }
-                // }
-                
+                ppu.update(cpu, writer,mouse_x,mouse_y);     
             }
         }
 

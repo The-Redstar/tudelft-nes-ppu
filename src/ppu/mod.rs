@@ -16,7 +16,6 @@ pub mod registers;
 
 /// Emulating an NTSC PPU chip
 pub struct Ppu {
-    pub pointed_pixel: [u8; 3],
     /// how many lines we've drawn. After 240, an NMI is given to the cpu
     /// and only at 262 does it reset to 0
     scanline: usize,
@@ -64,7 +63,6 @@ impl Ppu {
     /// by the emulator.
     pub fn new(mirroring: Mirroring) -> Self {
         Self {
-            pointed_pixel: [0,0,0],
             scanline: 0,
             line_progress: 0,
             controller_register: ControllerRegister::default(),
@@ -85,10 +83,6 @@ impl Ppu {
             mirroring,
             buttons: Buttons::default(),
         }
-    }
-
-    pub fn get_pointed_pixel(&self) -> [u8;3] {
-        self.pointed_pixel
     }
 
 
@@ -416,7 +410,7 @@ impl Ppu {
         x: usize,
         y: usize,
         name_table_address: u16,
-        px: i32, py: i32, //pixels pointed to by cursor
+        ptr_x: i32, ptr_y: i32, //pixels pointed to by cursor
     ) -> bool {
         let scroll_x = self.scroll.x;
         let scroll_y = self.scroll.y;
@@ -466,7 +460,7 @@ impl Ppu {
             color.2 = 0xff;
         }
 
-        if (x as i32 - px).abs() + (y as i32 - py).abs() < 2 {
+        if x as i32 == ptr_x && y as i32 == ptr_y {//(x as i32 - px).abs() + (y as i32 - py).abs() < 2 {
             if color.0>200 && color.1>200 && color.2>200 {
                 self.buttons.light = true;
             } else {
@@ -496,7 +490,7 @@ impl Ppu {
         mut sprite_y_off: u16,
         name_table: u16,
 
-        px:i32,py:i32,
+        ptr_x:i32,ptr_y:i32, //mouse pointer pixel coordinates
     ) -> bool {
         let mut sprite_zero_hit = false;
 
@@ -560,11 +554,11 @@ impl Ppu {
 
         // Don't draw a background sprite over background tiles,
         // but do draw it over the background color
-        if behind_background && self.draw_pixel(cpu, screen, x, y, name_table, px,py) {
+        if behind_background && self.draw_pixel(cpu, screen, x, y, name_table, ptr_x,ptr_y) {
             return sprite_zero_hit;
         }
-        
-        if (x as i32 - px).abs() + (y as i32 - py).abs() < 2 {
+
+        if x as i32 == ptr_x && y as i32 == ptr_y {//(x as i32 - px).abs() + (y as i32 - py).abs() == 0 {
             if color.0>200 && color.1>200 && color.2>200 {
                 self.buttons.light = true;
             } else {
@@ -576,7 +570,7 @@ impl Ppu {
         sprite_zero_hit
     }
 
-    fn draw_sprites(&mut self, cpu: &mut impl Cpu, screen: &mut ScreenWriter, name_table: u16, px:i32, py:i32) -> bool {
+    fn draw_sprites(&mut self, cpu: &mut impl Cpu, screen: &mut ScreenWriter, name_table: u16, ptr_x:i32, ptr_y:i32) -> bool { //ptr_xy are mouse pointer coordinates
         let mut sprite_zero_hit = false;
 
         for i in (0..8).rev() {
@@ -598,7 +592,7 @@ impl Ppu {
                     (self.line_progress - sprite_x as usize) as u16,
                     (self.scanline - sprite_y as usize) as u16,
                     name_table,
-                    px,py,
+                    ptr_x,ptr_y,
                 );
             }
         }
@@ -607,7 +601,7 @@ impl Ppu {
     }
 
     /// the screen is optional, since sometimes there is no screen (headless mode)
-    pub(crate) fn update(&mut self, cpu: &mut impl Cpu, screen: &mut ScreenWriter, px:i32,py:i32) {
+    pub(crate) fn update(&mut self, cpu: &mut impl Cpu, screen: &mut ScreenWriter, ptr_x:i32,ptr_y:i32) { //ptr_x/y are mouse pointer coords
         self.update_scanline(cpu, screen);
 
         if !self.blanking() {
@@ -619,10 +613,10 @@ impl Ppu {
                 self.line_progress,
                 self.scanline,
                 nametable_addr,
-                px,py,
+                ptr_x,ptr_y,
             );
 
-            if self.draw_sprites(cpu, screen, nametable_addr, px,py) {
+            if self.draw_sprites(cpu, screen, nametable_addr, ptr_x,ptr_y) {
                 self.status_register.sprite_zero_hit = true;
             }
         }

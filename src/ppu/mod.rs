@@ -581,7 +581,7 @@ impl Ppu {
 
             if self.line_progress >= sprite_x as usize
                 && self.line_progress < sprite_x as usize + 8
-                && self.scanline >= sprite_y as usize
+                && self.scanline >= sprite_y as usize // check added because PPU crashed on Zelda/Blaster Master
                 && sprite_y != 0xff
             {
                 sprite_zero_hit |= self.draw_sprite_pixel(

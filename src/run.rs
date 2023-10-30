@@ -1,11 +1,12 @@
 use crate::cpu::Cpu;
-use crate::screen::{ButtonName, Message, Screen, ScreenWriter};
+use crate::screen::{ButtonName, Message, Screen, ScreenWriter, ScreenReader};
 use crate::{Mirroring, Ppu, CPU_FREQ, HEIGHT, WIDTH};
 use pixels::{Pixels, SurfaceTexture};
+use winit::dpi::PhysicalSize;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 use std::{env, thread};
-use winit::event::{ElementState, Event, VirtualKeyCode, WindowEvent};
+use winit::event::{ElementState, Event, VirtualKeyCode, WindowEvent, MouseButton};
 use winit::event_loop::{ControlFlow, EventLoop};
 use winit::window::WindowBuilder;
 
@@ -22,10 +23,15 @@ fn run_ppu<CPU: Cpu>(
     let mut cycles = 0;
     let mut last_tick = Instant::now();
 
+    let mut mouse_x = 0;
+    let mut mouse_y = 0;
+
+
     loop {
         for _ in 0..ITER_PER_CYCLE {
             if let ScreenWriter::Real {
                 control_rx: buttons_rx,
+                screen,
                 ..
             } = writer
             {
@@ -80,6 +86,9 @@ fn run_ppu<CPU: Cpu>(
                             ButtonName::Select2 => {
                                 ppu.buttons.select2 = pressed;
                             }
+                            ButtonName::MouseLeft => {
+                                ppu.buttons.trigger = pressed;
+                            }
                         },
                         Message::Pause(true) => {
                             while let Message::Pause(true) =
@@ -90,6 +99,21 @@ fn run_ppu<CPU: Cpu>(
                             last_tick = Instant::now();
                         }
                         Message::Pause(false) => {}
+                        Message::PixelPointed(posx,posy) => {
+                            let reader = screen.0.as_ref();
+                            if let ScreenReader::Real{window, ..}= reader {
+                                //0: take the position
+                                //1: take the screen size
+                                let screensize = window.inner_size();
+                                //2: compute relative screen dimensions
+                                let (relx,rely) = (posx / screensize.width as f64, posy / screensize.height as f64);
+                                //3: compute pointed pixel coordinates
+                                (mouse_x,mouse_y) = ((WIDTH as f64 * relx) as i32,(HEIGHT as f64 * rely) as i32);
+                                //mouse_x=mouse_x.min(WIDTH as i32-1).max(0); //bounding not required because we are no longer indexing pixels
+                                //mouse_y=mouse_y.min(HEIGHT as i32-1).max(0);
+                            }
+                            
+                        }
                     }
                 }
             }
@@ -100,7 +124,7 @@ fn run_ppu<CPU: Cpu>(
             }
 
             for _ in 0..3 {
-                ppu.update(cpu, writer);
+                ppu.update(cpu, writer,mouse_x,mouse_y);     
             }
         }
 
@@ -177,7 +201,14 @@ where
         .build(&event_loop)
         .expect("failed to create window");
 
+    //let window_size = window.inner_size();
+
+    //println!("Window size: {window_size:?}");
+    //modification for duck hunt
+    //force canvas to take up full window
+    window.set_inner_size(PhysicalSize::new(WIDTH*2,HEIGHT*2));
     let window_size = window.inner_size();
+
     let surface_texture = SurfaceTexture::new(window_size.width, window_size.height, &window);
     let pixels = Pixels::new(WIDTH, HEIGHT, surface_texture).expect("failed to create surface");
 
@@ -210,6 +241,29 @@ where
                 ..
             } => {
                 control_tx.send(Message::Pause(!f)).expect("failed to send");
+            }
+            Event::WindowEvent {
+                event: WindowEvent::CursorMoved { position, .. },
+                ..
+            } => {
+                /* DUCK HUNT ADDITION */
+                
+                // println!("{:?}",position);
+                control_tx
+                    .send(Message::PixelPointed(position.x,position.y))
+                    .expect("failed to send");
+                /* = = = = = = = = = */
+            }
+            Event::WindowEvent {
+                event:WindowEvent::MouseInput {state: button_state, button: MouseButton::Left, .. } ,
+                ..
+            } => {
+                control_tx
+                    .send(Message::Button(
+                        ButtonName::MouseLeft,
+                        button_state == ElementState::Pressed,
+                    ))
+                    .expect("failed to send");
             }
             Event::WindowEvent {
                 event: WindowEvent::KeyboardInput { input, .. },

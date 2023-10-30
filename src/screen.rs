@@ -25,6 +25,9 @@ pub struct Buttons {
     pub right2: bool,
     pub select2: bool,
     pub start2: bool,
+
+    pub light: bool,
+    pub trigger: bool,
 }
 
 impl Buttons {
@@ -69,6 +72,7 @@ pub enum ButtonName {
     Right2,
     Start2,
     Select2,
+    MouseLeft,
 }
 
 pub enum ScreenReader {
@@ -82,10 +86,11 @@ pub enum ScreenReader {
 pub enum Message {
     Button(ButtonName, bool),
     Pause(bool),
+    PixelPointed(f64,f64),
 }
 
 #[derive(Clone)]
-pub struct Screen(Arc<ScreenReader>);
+pub struct Screen(pub Arc<ScreenReader>);
 
 pub enum ScreenWriter {
     Dummy,

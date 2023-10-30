@@ -51,7 +51,7 @@ pub struct Ppu {
     // new reads go into the data buffer, and when you read you read the old buffer
     data_buffer: u8,
 
-    mirroring: Mirroring,
+    pub mirroring: Mirroring,
 
     pub(crate) buttons: Buttons,
 }
